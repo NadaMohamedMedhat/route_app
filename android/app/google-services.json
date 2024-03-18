@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "21281578455",
+    "project_id": "flutter-diploma-task",
+    "storage_bucket": "flutter-diploma-task.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21281578455:android:5c0ebf1d050556635abf92",
+        "android_client_info": {
+          "package_name": "com.example.route_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMR-RcOwv_QcXEzRiD5T5ES2XqpfAUllM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
