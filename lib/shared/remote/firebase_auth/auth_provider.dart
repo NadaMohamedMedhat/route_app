@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 
 import '../../../model/user_model.dart';
+import '../firestore/firestore_helper.dart';
 
 class AuthProviders extends ChangeNotifier {
   User? firebaseUserAuth;
@@ -22,13 +23,13 @@ class AuthProviders extends ChangeNotifier {
     return true;
   }
 
- /* Future<void> retrieveDatabaseUserData() async {
-    try {
-      databaseUser = await FirestoreHelper.getUser(firebaseUserAuth!.uid);
-    } catch (error) {
+  Future<void> retrieveDatabaseUserData()async{
+    try{
+      databaseUser = await FireStoreHelper.getUser(firebaseUserAuth!.uid);
+    }catch(error){
       print(error);
     }
-  }*/
+  }
 
   Future<void> signOut() async {
     firebaseUserAuth = null;

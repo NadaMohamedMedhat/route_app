@@ -1,12 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:route_app/shared/providers/theme_provider.dart';
+import 'package:route_app/shared/remote/firebase_auth/auth_provider.dart';
 import 'package:route_app/shared/remote/firebase_auth/firebase_auth_error_codes.dart';
+import 'package:route_app/shared/remote/firestore/firestore_helper.dart';
 import 'package:route_app/shared/reusable%20components/custom_text_field.dart';
 import 'package:route_app/shared/reusable%20components/dialog_utils.dart';
 import 'package:route_app/style/app_colors.dart';
 
+import '../../../model/user_model.dart';
 import '../../../shared/constants/constant.dart';
+import '../../../shared/reusable components/theme_icon.dart';
 import '../../../style/app_theme.dart';
 import '../../home/home_screen.dart';
 import '../login/login_screen.dart';
@@ -35,6 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeMode themeMode = Provider.of<ThemeProvider>(context).themeMode;
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
@@ -50,13 +57,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SvgPicture.asset(
-                        'assets/images/route.svg',
+                        themeMode == ThemeMode.light
+                            ? 'assets/images/route.svg'
+                            : 'assets/images/route_dark.svg',
                       ),
-                      Icon(
-                        Icons.dark_mode,
-                        color: Theme.of(context).iconTheme.color,
-                        size: Theme.of(context).iconTheme.size,
-                      ),
+                      const ThemeIcon(),
                     ],
                   ),
                   const SizedBox(
@@ -68,7 +73,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   Text(
                     'Connect with your friends today!',
-                    style: Theme.of(context).textTheme.labelSmall,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.labelSmallColor,
+                        ),
                   ),
                   const SizedBox(
                     height: 20,
@@ -76,7 +83,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Full Name',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.lightPrimaryColor,
+                          color: themeMode == ThemeMode.light
+                              ? AppColors.lightPrimaryColor
+                              : AppColors.white,
                         ),
                   ),
                   CustomTextFormField(
@@ -96,7 +105,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Email',
                     style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.lightPrimaryColor,
+                      color: themeMode == ThemeMode.light
+                          ? AppColors.lightPrimaryColor
+                          : AppColors.white,
                     ),
                   ),
                   CustomTextFormField(
@@ -119,7 +130,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Password',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.lightPrimaryColor,
+                          color: themeMode == ThemeMode.light
+                              ? AppColors.lightPrimaryColor
+                              : AppColors.white,
                         ),
                   ),
                   CustomTextFormField(
@@ -145,7 +158,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: isObscured
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
-                      style: Theme.of(context).iconButtonTheme.style,
+                      style: Theme.of(context).iconButtonTheme.style?.copyWith(
+                            iconColor: MaterialStateProperty.all(
+                              themeMode == ThemeMode.light
+                                  ? AppColors.black
+                                  : AppColors.lightPrimaryColor,
+                            ),
+                          ),
                     ),
                   ),
                   const SizedBox(
@@ -154,7 +173,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     'Confirm Password',
                     style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.lightPrimaryColor,
+                      color: themeMode == ThemeMode.light
+                          ? AppColors.lightPrimaryColor
+                          : AppColors.white,
                     ),
                   ),
                   CustomTextFormField(
@@ -180,7 +201,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: isObscured
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
-                      style: Theme.of(context).iconButtonTheme.style,
+                      style: Theme.of(context).iconButtonTheme.style?.copyWith(
+                            iconColor: MaterialStateProperty.all(
+                              themeMode == ThemeMode.light
+                                  ? AppColors.black
+                                  : AppColors.lightPrimaryColor,
+                            ),
+                          ),
                     ),
                   ),
                   const SizedBox(
@@ -196,7 +223,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(
                         'Sign Up',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.white,
+                              color: themeMode == ThemeMode.light
+                                  ? AppColors.white
+                                  : AppColors.black,
                             ),
                       ),
                     ),
@@ -236,6 +265,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> registerUser() async {
+    AuthProviders authProviders = Provider.of<AuthProviders>(
+      context,
+      listen: false,
+    );
     if (formKey.currentState!.validate()) {
       DialogUtils.showLoadingDialog(context);
       try {
@@ -244,22 +277,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: emailController.text,
           password: passwordController.text,
         );
+
+        FireStoreHelper.addUser(
+          emailController.text,
+          fullNameController.text,
+          credential.user!.uid,
+        );
+
         DialogUtils.hideDialog(context);
 
         //User ID is generated by firebase
         print(credential.user!.uid);
 
+        //todo: ask why dialog not appear here ??
         DialogUtils.showMessage(
             context: context,
             message: 'Register Successfully',
             positiveText: 'ok',
             positivePress: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                HomeScreen.routeName,
-                (route) => false,
+              authProviders.setUsers(
+                credential.user,
+                UserModel(
+                  id: credential.user!.uid,
+                  email: emailController.text,
+                  fullName: fullNameController.text,
+                ),
               );
             });
+        DialogUtils.hideDialog(context);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          HomeScreen.routeName,
+          (route) => false,
+        );
       } on FirebaseAuthException catch (e) {
         DialogUtils.hideDialog(context);
         if (e.code == FirebaseAuthErrorCodes.weakPassword) {

@@ -2,26 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../model/user_model.dart';
 
-//todo: try to write this class again from scratch
+
 class FireStoreHelper {
   //create users collection if there is no collection with that name
-  CollectionReference<UserModel> getUserCollection() {
+  static CollectionReference<UserModel> getUserCollection() {
     CollectionReference<UserModel> userRef =
         FirebaseFirestore.instance.collection('Users').withConverter(
       fromFirestore: (snapshot, option) {
         Map<String, dynamic> data = snapshot.data()!;
         return UserModel.fromFirestore(data);
       },
-      toFirestore: (UserModel, option) {
-        return UserModel.toFirestore();
+      toFirestore: (userModel, option) {
+        return userModel.toFirestore();
       },
     );
     return userRef;
   }
 
-  addUser(String email, String fullName, String userID) {
+  static Future<void> addUser(String email, String fullName, String userID) async {
     DocumentReference<UserModel> userDoc = getUserCollection().doc(userID);
-    userDoc.set(
+    await userDoc.set(
       UserModel(
         id: userID,
         email: email,
@@ -30,9 +30,10 @@ class FireStoreHelper {
     );
   }
 
-  Future<UserModel> getUser(String userID) async {
+  static Future<UserModel?> getUser(String userID) async {
     DocumentReference<UserModel> userDoc = getUserCollection().doc(userID);
     DocumentSnapshot<UserModel> snapshot = await userDoc.get();
-    return snapshot.data()!;
+    UserModel userModel = snapshot.data()!;
+    return userModel;
   }
 }

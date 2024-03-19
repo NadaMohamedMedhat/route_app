@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:route_app/style/app_colors.dart';
+
+import '../providers/theme_provider.dart';
 
 class DialogUtils {
   static void showLoadingDialog(
@@ -72,7 +75,9 @@ class DialogUtils {
                             onPressed: positivePress,
                             child: Text(
                               positiveText,
-                              style: Theme.of(context).textTheme.labelSmall,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: AppColors.black,
+                              ),
                             ),
                           ),
                       ],

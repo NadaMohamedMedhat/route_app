@@ -4,13 +4,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:route_app/layout/auth/register/register_screen.dart';
 import 'package:route_app/layout/home/home_screen.dart';
+import 'package:route_app/model/user_model.dart';
 import 'package:route_app/shared/remote/firebase_auth/auth_provider.dart';
 import 'package:route_app/shared/remote/firebase_auth/firebase_auth_error_codes.dart';
+import 'package:route_app/shared/remote/firestore/firestore_helper.dart';
 import 'package:route_app/shared/reusable%20components/custom_text_field.dart';
 import 'package:route_app/shared/reusable%20components/dialog_utils.dart';
 import 'package:route_app/style/app_colors.dart';
 
 import '../../../shared/constants/constant.dart';
+import '../../../shared/providers/theme_provider.dart';
+import '../../../shared/reusable components/theme_icon.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
@@ -29,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeMode themeMode = Provider.of<ThemeProvider>(context).themeMode;
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
@@ -44,13 +49,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SvgPicture.asset(
-                        'assets/images/route.svg',
+                        themeMode == ThemeMode.light
+                            ? 'assets/images/route.svg'
+                            : 'assets/images/route_dark.svg',
                       ),
-                      Icon(
-                        Icons.dark_mode,
-                        color: Theme.of(context).iconTheme.color,
-                        size: Theme.of(context).iconTheme.size,
-                      ),
+                      const ThemeIcon(),
                     ],
                   ),
                   const SizedBox(
@@ -62,7 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Text(
                     'Hello again, you’ve been missed!',
-                    style: Theme.of(context).textTheme.labelSmall,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.labelSmallColor,
+                    ),
                   ),
                   const SizedBox(
                     height: 20,
@@ -70,7 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Email',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.lightPrimaryColor,
+                          color: themeMode == ThemeMode.light
+                              ? AppColors.lightPrimaryColor
+                              : AppColors.white,
                         ),
                   ),
                   CustomTextFormField(
@@ -90,12 +97,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-                  Text(
-                    'Password',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.lightPrimaryColor,
-                        ),
-                  ),
+                  Text('Password',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: themeMode == ThemeMode.light
+                            ? AppColors.lightPrimaryColor
+                            : AppColors.white,
+                      ),),
                   CustomTextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     controller: passwordController,
@@ -119,7 +126,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: isObscured
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
-                      style: Theme.of(context).iconButtonTheme.style,
+                      style: Theme.of(context).iconButtonTheme.style?.copyWith(
+                        iconColor: MaterialStateProperty.all(
+                          themeMode == ThemeMode.light
+                              ? AppColors.black
+                              : AppColors.lightPrimaryColor,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -136,8 +149,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Login',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.white,
-                            ),
+                          color: themeMode == ThemeMode.light
+                              ? AppColors.white
+                              : AppColors.black,
+                        ),
                       ),
                     ),
                   ),
@@ -176,8 +191,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> login() async {
-    //todo: auto login
-
     AuthProviders authProviders = Provider.of<AuthProviders>(
       context,
       listen: false,
@@ -195,6 +208,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         //user id is stored in credential.user.uid
         print(credential.user?.uid);
+        UserModel? userModel =
+            await FireStoreHelper.getUser(credential.user!.uid);
+        authProviders.setUsers(credential.user, userModel);
 
         DialogUtils.showMessage(
             context: context,
