@@ -5,26 +5,26 @@ import 'package:route_app/layout/auth/login/login_screen.dart';
 import 'package:route_app/layout/auth/register/register_screen.dart';
 import 'package:route_app/layout/home/home_screen.dart';
 import 'package:route_app/layout/splash/splash_screen.dart';
+import 'package:route_app/shared/prefs_helper.dart';
 import 'package:route_app/shared/providers/theme_provider.dart';
 import 'package:route_app/style/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 import 'shared/remote/firebase_auth/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  PrefsHelper.preferences = await SharedPreferences.getInstance();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  //todo: ask about shared prefs
-  ThemeProvider provider = ThemeProvider();
-  await provider.loadTheme();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProviders()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
       ],
       child: const MyApp(),
     ),

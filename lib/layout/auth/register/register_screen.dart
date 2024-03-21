@@ -278,7 +278,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           password: passwordController.text,
         );
 
-        FireStoreHelper.addUser(
+        await FireStoreHelper.addUser(
           emailController.text,
           fullNameController.text,
           credential.user!.uid,
@@ -303,13 +303,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   fullName: fullNameController.text,
                 ),
               );
+              DialogUtils.hideDialog(context);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                HomeScreen.routeName,
+                    (route) => false,
+              );
             });
-        DialogUtils.hideDialog(context);
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          HomeScreen.routeName,
-          (route) => false,
-        );
       } on FirebaseAuthException catch (e) {
         DialogUtils.hideDialog(context);
         if (e.code == FirebaseAuthErrorCodes.weakPassword) {
