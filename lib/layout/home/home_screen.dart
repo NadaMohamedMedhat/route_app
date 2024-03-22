@@ -49,9 +49,9 @@ class HomeScreen extends StatelessWidget {
                           'Enjoy our courses',
                           style:
                               Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppColors.labelSmallColor,
-                                fontSize: 16,
-                              ),
+                                    color: AppColors.labelSmallColor,
+                                    fontSize: 16,
+                                  ),
                         ),
                       ],
                     ),
