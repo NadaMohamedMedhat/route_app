@@ -18,6 +18,7 @@ class AppTheme {
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
+
     ),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
@@ -56,6 +57,7 @@ class AppTheme {
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
+
     ),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
